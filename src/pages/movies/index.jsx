@@ -1,18 +1,25 @@
-import "react-loading-skeleton/dist/skeleton.css";
+import 'react-loading-skeleton/dist/skeleton.css';
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
-import _ from "lodash";
-import Image from "next/image";
-import { useRouter } from "next/router";
-import Skeleton from "react-loading-skeleton";
-import { useDispatch } from "react-redux";
+import _ from 'lodash';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import Skeleton from 'react-loading-skeleton';
+import { useDispatch } from 'react-redux';
 
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import Layout from "@/components/Layout";
-import { orderAction } from "@/redux/slice/order";
-import { getGenre, getMovies } from "@/utils/https/movies";
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
+import Layout from '@/components/Layout';
+import { orderAction } from '@/redux/slice/order';
+import {
+  getGenre,
+  getMovies,
+} from '@/utils/https/movies';
 
 function Movies() {
   const dispatch = useDispatch();
@@ -20,7 +27,7 @@ function Movies() {
   const [dataMovies, setDataMovies] = useState([]);
   const [meta, setMeta] = useState({
     totalpage: 1,
-    limit: "12",
+    limit: "8",
     page: 1,
     totaldata: 0,
   });
@@ -33,18 +40,23 @@ function Movies() {
   const [isLoading, setLoading] = useState(true);
   const [catLoad, setCatLoad] = useState(true);
 
+  const moviesController = useMemo(
+    () => new AbortController(),
+    [sort, page, search]
+  );
   const handleNavigate = (url) => router.push(url);
 
   const fetching = async (page = 1, search = "", sort = "") => {
     const params = {
-      limit: 12,
+      limit: 8,
       page,
       search,
       sort,
     };
     try {
       setLoading(true);
-      const result = await getMovies(params, controller);
+      console.log(`page : ${page}`);
+      const result = await getMovies(params, moviesController);
       // console.log(result);
       setDataMovies(result.data.data);
       setMeta({
@@ -87,7 +99,10 @@ function Movies() {
   if (!isLoading && page > meta.totalpage)
     push({ query: { ...router.query, page: 1 } });
 
-  if (page < 1) push({ query: { ...router.query, page: 1 } });
+  if (page < 1) {
+    moviesController.abort();
+    push({ query: { ...router.query, page: 1 } });
+  }
 
   return (
     <>
@@ -101,7 +116,7 @@ function Movies() {
                 className="select w-52 max-w-xs"
                 value={sort}
                 onChange={(e) => {
-                  if (sort !== e.target.value) return;
+                  if (sort === e.target.value) return;
                   push({
                     query: { ...router.query, sort: e.target.value },
                   });
@@ -232,7 +247,7 @@ function Movies() {
                         handleNavigate({
                           query: {
                             ...query,
-                            search: "",
+                            page: meta.page - 1,
                           },
                         })
                       }

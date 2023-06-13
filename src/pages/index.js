@@ -1,13 +1,15 @@
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/router";
+import { useState } from 'react';
 
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import Layout from "@/components/Layout";
-import { getMovies } from "@/utils/https/movies";
-import { useDispatch } from "react-redux";
-import { orderAction } from "@/redux/slice/order";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useDispatch } from 'react-redux';
+
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
+import Layout from '@/components/Layout';
+import { orderAction } from '@/redux/slice/order';
+import { getMovies } from '@/utils/https/movies';
 
 function Home({ movies, error }) {
   const dispatch = useDispatch();
@@ -17,6 +19,22 @@ function Home({ movies, error }) {
     const payload = { id: id, name: name };
     dispatch(orderAction.addMovieId(payload));
     handleNavigate(`/movies/${id}`);
+  };
+
+  const [email, setEmail] = useState("");
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+    router.push(
+      {
+        pathname: "/signup",
+        query: {
+          email,
+        },
+      },
+      "/signup"
+    );
+    console.log(email);
   };
 
   return (
@@ -86,12 +104,40 @@ function Home({ movies, error }) {
               <div
                 className={`p-8 w-56 bg-white/20 border-2 border-white rounded-md flex flex-col text-center gap-5 hover:bg-white group-hover:absolute group-hover:shadow-list-movie z-10`}
               >
-                <Image src={image} alt="" width={150} height={250}></Image>
-                <div class="group-hover:flex flex-col gap-y-3 hidden">
-                  <p class="font-bold text-lg text-primary-title text-center">
+                <div className="w-36 h-56 relative">
+                  <Image
+                    src={image}
+                    alt=""
+                    fill
+                    sizes="100%"
+                    className="object-cover"
+                  ></Image>
+                </div>
+                <div className="group-hover:flex flex-col gap-y-3 hidden">
+                  <p className="font-bold text-lg text-primary-title text-center">
                     {movie_name}
                   </p>
-                  <p class="text-xs text-gray-400 text-center">{category}</p>
+                  <p className="text-xs text-gray-400 text-center mb-4">
+                    {category}
+                  </p>
+                  <div className="m-auto w-full flex flex-col gap-3">
+                    <button
+                      className="mt-auto btn btn-sm btn-block btn-accent border-primary text-primary font-normal hover:border-primary-focus"
+                      onClick={() => {
+                        addMovie(id, movie_name);
+                      }}
+                    >
+                      Details
+                    </button>
+                    <button
+                      className="mt-auto btn btn-sm btn-block btn-primary text-white font-normal hover:border-primary-focus"
+                      onClick={() => {
+                        addMovie(id, movie_name);
+                      }}
+                    >
+                      Book now
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -146,12 +192,20 @@ function Home({ movies, error }) {
               } flex-shrink-0 flex-grow-0 w-56 p-8 bg-white/20 border-[0.5px] border-primary-line rounded-md flex flex-col  items-center text-center gap-5`}
               key={idx}
             >
-              <Image src={image} alt="" width={150} height={250}></Image>
+              <div className="w-36 h-56 relative">
+                <Image
+                  src={image}
+                  alt=""
+                  fill
+                  sizes="100%"
+                  className="object-cover"
+                ></Image>
+              </div>
               <div className="flex flex-col gap-1 mb-3">
-                <p class="font-bold text-lg text-primary-title text-center">
+                <p className="font-bold text-lg text-primary-title text-center">
                   {movie_name}
                 </p>
-                <p class="text-xs text-gray-400 text-center">{category}</p>
+                <p className="text-xs text-gray-400 text-center">{category}</p>
               </div>
               <button
                 className="mt-auto btn btn-sm btn-block btn-accent border-primary text-primary font-normal hover:border-primary-focus"
@@ -172,13 +226,21 @@ function Home({ movies, error }) {
               </p>
               <p className="text-primary text-5xl font-bold">Moviegoers</p>
             </div>
-            <div className="flex flex-col md:flex-row gap-4">
+            <form
+              className="flex flex-col md:flex-row gap-4"
+              onSubmit={submitHandler}
+            >
               <input
                 className="px-4 border-primary-line border-2 h-12 rounded-md w-72 text-sm tracking-wider"
                 placeholder="Type your email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
-              <button className="btn btn-primary text-white">Join now</button>
-            </div>
+              <button type="submit" className="btn btn-primary text-white">
+                Join now
+              </button>
+            </form>
             <div className="text-primary-label text-sm  tracking-wider">
               <p>By joining you as a Tickitz member,</p>
               <p>we will always send you the latest updates via email .</p>
